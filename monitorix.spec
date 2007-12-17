@@ -8,7 +8,6 @@ URL: http://www.monitorix.org
 
 Source: %{name}-%{version}.tar.gz
 Requires: bash, rrdtool, perl, xinetd, apache, perl-CGI
-BuildRoot:      %{_tmppath}/%{name}-%{version}
 BuildArch: noarch
 
 %description
