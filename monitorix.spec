@@ -1,6 +1,6 @@
 Summary: Monitorix rrd graph System status monitor
 Name: monitorix
-Version: 0.9.1
+Version: 1.2.0
 Release: %mkrel 1
 License: GPL
 Group: Monitoring
