@@ -1,6 +1,6 @@
 %define name    monitorix
 %define version 1.2.0
-%define rel     2
+%define rel     3
 %define release %mkrel %{rel}
 
 Name:           %{name}
@@ -10,7 +10,6 @@ Summary: Monitorix is a free, open source, lightweight system monitoring tool
 License: GPLv2
 Group: Monitoring
 URL: http://www.monitorix.org
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Source0: http://www.monitorix.org/%{name}-%{version}.tar.gz
 Source1: %{name}.initscript
 Patch0: monitorix-1.2.0-add_mdv_support.patch
@@ -19,7 +18,13 @@ Patch2: monitorix-1.2.0-relocatable.patch
 Patch3: monitorix-1.2.0-use_distro_name.patch
 Requires: rrdtool, xinetd, apache, perl-CGI
 Requires: iptables
+Requires(post):   rpm-helper
+Requires(preun):   rpm-helper
+%if %mdkversion < 201010
+Requires(postun):   rpm-helper
+%endif
 BuildArch: noarch
+BuildRoot: %{_tmppath}/%{name}-%{version}
 
 %description
 Monitorix is a free, open source, lightweight system monitoring tool
@@ -54,25 +59,29 @@ install -m 0755 %{SOURCE1} ${RPM_BUILD_ROOT}/%{_initrddir}/%name
 # apache configuration
 install -d -m 755 %{buildroot}%{_webappconfdir}
 cat > %{buildroot}%{_webappconfdir}/%{name}.conf <<EOF
-Alias /%{name}/ "/var/www/%{name}/"
-<Location /%{name}>
+Alias /%{name} /var/www/%{name}
+<Directory /var/www/%{name}>
 	Order allow,deny
 	Allow from all
 </Location>
 EOF
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %post
 %_post_service %{name}
+%if %mdkversion < 201010
 %_post_webapp
+%endif
 
 %preun
 %_preun_service %{name}
 
 %postun
+%if %mdkversion < 201010
 %_postun_webapp
+%endif
 
 %files
 %defattr(-,root, root)
