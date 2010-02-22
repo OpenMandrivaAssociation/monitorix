@@ -12,10 +12,6 @@ Group: Monitoring
 URL: http://www.monitorix.org
 Source0: http://www.monitorix.org/%{name}-%{version}.tar.gz
 Source1: %{name}.initscript
-Patch0: monitorix-1.2.0-add_mdv_support.patch
-Patch1: monitorix-1.2.0-non_interactive_mode.patch
-Patch2: monitorix-1.2.0-relocatable.patch
-Patch3: monitorix-1.2.0-use_distro_name.patch
 Requires: rrdtool, xinetd, apache, perl-CGI
 Requires: iptables
 Requires(post):   rpm-helper
@@ -37,24 +33,28 @@ accessed via a web browser.
 
 %prep
 %setup -q
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
 
 %build
 
 %install
-rm -rf ${RPM_BUILD_ROOT}
+rm -rf %{buildroot}
 
-# Run the built-in install script, patched to support mdv
-# It actually fails to install the initscript which is missing
-# (mandriva is not supported upstream yet)
-./install.sh mandriva ${RPM_BUILD_ROOT}
+install -d -m 755 %{buildroot}%{_sbindir}
+install -m 755 monitorix.pl %{buildroot}%{_sbindir}
+
+install -d -m 755 %{buildroot}%{_sysconfdir}
+install -m 644 monitorix.conf %{buildroot}%{_sysconfdir}
+
+install -d -m 755 %{buildroot}%{_localstatedir}/lib/monitorix
+cp -r reports %{buildroot}%{_localstatedir}/lib/monitorix
+
+install -d -m 755 %{buildroot}%{_localstatedir}/www/monitorix
+install -m 644 monitorixico.png envelope.png logo_bot_black.png logo_bot_white.png logo_top.jpg %{buildroot}%{_localstatedir}/www/monitorix
+install -m 755 monitorix.cgi %{buildroot}%{_localstatedir}/www/monitorix
 
 # install initscript provided with this package
-mkdir -p ${RPM_BUILD_ROOT}/%{_initrddir}/
-install -m 0755 %{SOURCE1} ${RPM_BUILD_ROOT}/%{_initrddir}/%name
+install -d -m 755 %{buildroot}%{_initrddir}
+install -m 755 %{SOURCE1} %{buildroot}%{_initrddir}/%name
 
 # apache configuration
 install -d -m 755 %{buildroot}%{_webappconfdir}
@@ -85,35 +85,10 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root, root)
+%doc Changes Configuration.help COPYING monitorix-apache.conf monitorix.spec README
 %{_initrddir}/%name
-%attr(644,root,root) %config(noreplace) %{_sysconfdir}/%{name}.conf
-%attr(755,root,root) %{_sbindir}/%{name}.pl
-%defattr(-,root,root)
-/var/www/%{name}/logo_top.jpg
-/var/www/%{name}/logo_bot_black.png
-/var/www/%{name}/logo_bot_white.png
-/var/www/%{name}/envelope.png
-/var/www/%{name}/monitorixico.png
-/var/www/%{name}/%{name}.cgi
+%config(noreplace) %{_sysconfdir}/%{name}.conf
 %config(noreplace) %{_webappconfdir}/%{name}.conf
-/var/lib/%{name}/reports/ca/traffic_report.html
-/var/lib/%{name}/reports/ca/traffic_report.sh
-/var/lib/%{name}/reports/ca/imgs_email/blank.png
-/var/lib/%{name}/reports/ca/imgs_email/logo.jpg
-/var/lib/%{name}/reports/ca/imgs_email/signature.png
-/var/lib/%{name}/reports/ca/imgs_email/title.jpg
-/var/lib/%{name}/reports/en/traffic_report.html
-/var/lib/%{name}/reports/en/traffic_report.sh
-/var/lib/%{name}/reports/en/imgs_email/blank.png
-/var/lib/%{name}/reports/en/imgs_email/logo.jpg
-/var/lib/%{name}/reports/en/imgs_email/signature.png
-/var/lib/%{name}/reports/en/imgs_email/title.jpg
-/var/lib/%{name}/reports/de/imgs_email/blank.png
-/var/lib/%{name}/reports/de/imgs_email/logo.jpg
-/var/lib/%{name}/reports/de/imgs_email/signature.png
-/var/lib/%{name}/reports/de/imgs_email/title.jpg
-/var/lib/%{name}/reports/de/traffic_report.html
-/var/lib/%{name}/reports/de/traffic_report.sh
-
-%doc COPYING Changes Configuration.help README monitorix-apache.conf
-
+%{_sbindir}/%{name}.pl
+%{_localstatedir}/www/%{name}
+%{_localstatedir}/lib/%{name}
