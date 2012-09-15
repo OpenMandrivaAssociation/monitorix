@@ -1,94 +1,85 @@
-%define name    monitorix
-%define version 1.2.0
-%define rel     4
-%define release %mkrel %{rel}
-
-Name:           %{name}
-Version:        %{version}
-Release:        %{release}
-Summary: Monitorix is a free, open source, lightweight system monitoring tool
+Summary: Monitorix is a system monitoring tool
+Name: monitorix
+Version: 2.5.2
+Release: 1
 License: GPLv2
 Group: Monitoring
 URL: http://www.monitorix.org
 Source0: http://www.monitorix.org/%{name}-%{version}.tar.gz
-Source1: %{name}.initscript
-Requires: rrdtool, xinetd, apache, perl-CGI
-Requires: iptables
-Requires(post):   rpm-helper
-Requires(preun):   rpm-helper
-%if %mdkversion < 201010
-Requires(postun):   rpm-helper
-%endif
+Source1: monitorix.service
 BuildArch: noarch
-BuildRoot: %{_tmppath}/%{name}-%{version}
+
+Requires: rrdtool
+Requires: perl
+Requires: perl-libwww-perl
+Requires: perl-MailTools
+Requires: perl-MIME-Lite
+Requires: perl-DBI
+
+Requires(pre): rpm-helper
+Requires(preun): rpm-helper
 
 %description
-Monitorix is a free, open source, lightweight system monitoring tool
-designed to monitorize as many services as it can. At this time it
-monitors from the CPU load and temperatures to the users using the
-system. Network devices activity, network services demand and even
-the devices' interrupt activity are also monitored. The current
-status of any corporate Linux server with Monitorix installed can be
-accessed via a web browser.
+Monitorix is a free, open source, lightweight system monitoring tool designed
+to monitor as many services and system resources as possible. It has been
+created to be used under production UNIX/Linux servers, but due to its
+simplicity and small size may also be used on embedded devices as well. 
 
 %prep
-%setup -q
+%setup
 
 %build
 
 %install
-rm -rf %{buildroot}
-
-install -d -m 755 %{buildroot}%{_sbindir}
-install -m 755 monitorix.pl %{buildroot}%{_sbindir}
-
-install -d -m 755 %{buildroot}%{_sysconfdir}
-install -m 644 monitorix.conf %{buildroot}%{_sysconfdir}
-
-install -d -m 755 %{buildroot}%{_localstatedir}/lib/monitorix
-cp -r reports %{buildroot}%{_localstatedir}/lib/monitorix
-
-install -d -m 755 %{buildroot}%{_localstatedir}/www/monitorix
-install -m 644 monitorixico.png envelope.png logo_bot_black.png logo_bot_white.png logo_top.jpg %{buildroot}%{_localstatedir}/www/monitorix
-install -m 755 monitorix.cgi %{buildroot}%{_localstatedir}/www/monitorix
-
-# install initscript provided with this package
-install -d -m 755 %{buildroot}%{_initrddir}
-install -m 755 %{SOURCE1} %{buildroot}%{_initrddir}/%name
-
-# apache configuration
-install -d -m 755 %{buildroot}%{_webappconfdir}
-cat > %{buildroot}%{_webappconfdir}/%{name}.conf <<EOF
-Alias /%{name} /var/www/%{name}
-<Directory /var/www/%{name}>
-	Order allow,deny
-	Allow from all
-</Location>
-EOF
-
-%clean
-rm -rf %{buildroot}
+#mkdir -p %{buildroot}%{_initrddir}
+#install -m 0755 docs/monitorix.init %{buildroot}%{_initrddir}/monitorix
+mkdir -p %{buildroot}%{_unitdir}
+install -m 0755 %{SOURCE1} %{buildroot}%{_unitdir}/
+mkdir -p %{buildroot}%{_sysconfdir}/httpd/conf.d
+install -m 0644 docs/monitorix-apache.conf %{buildroot}%{_sysconfdir}/httpd/conf.d/monitorix.conf
+mkdir -p %{buildroot}%{_sysconfdir}/logrotate.d
+install -m 0644 docs/monitorix.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/monitorix
+mkdir -p %{buildroot}%{_sysconfdir}
+install -m 0644 monitorix.conf %{buildroot}%{_sysconfdir}/monitorix.conf
+mkdir -p %{buildroot}%{_bindir}
+install -m 0755 monitorix %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_datadir}/monitorix
+install -m 0644 logo_top.png %{buildroot}%{_datadir}/monitorix
+install -m 0644 logo_bot.png %{buildroot}%{_datadir}/monitorix
+install -m 0644 monitorixico.png %{buildroot}%{_datadir}/monitorix
+mkdir -p %{buildroot}%{_datadir}/monitorix/imgs
+chmod -R 755 %{buildroot}%{_datadir}/monitorix/imgs
+mkdir -p %{buildroot}%{_datadir}/monitorix/cgi-bin
+install -m 0755 monitorix.cgi %{buildroot}%{_datadir}/monitorix/cgi-bin
+mkdir -p %{buildroot}%{_localstatedir}/lib/monitorix/reports
+install -m 0644 reports/*.html %{buildroot}%{_localstatedir}/lib/monitorix/reports
+install -m 0755 reports/send_reports %{buildroot}%{_localstatedir}/lib/monitorix/reports
+mkdir -p %{buildroot}%{_localstatedir}/lib/monitorix/usage
+mkdir -p %{buildroot}%{_mandir}/man5
+mkdir -p %{buildroot}%{_mandir}/man8
+install -m 0644 man/man5/monitorix.conf.5 %{buildroot}%{_mandir}/man5
+install -m 0644 man/man8/monitorix.8 %{buildroot}%{_mandir}/man8
 
 %post
 %_post_service %{name}
-%if %mdkversion < 201010
-%_post_webapp
-%endif
 
 %preun
 %_preun_service %{name}
 
-%postun
-%if %mdkversion < 201010
-%_postun_webapp
-%endif
-
 %files
-%defattr(-,root, root)
-%doc Changes Configuration.help COPYING monitorix-apache.conf monitorix.spec README
-%{_initrddir}/%name
-%config(noreplace) %{_sysconfdir}/%{name}.conf
-%config(noreplace) %{_webappconfdir}/%{name}.conf
-%{_sbindir}/%{name}.pl
-%{_localstatedir}/www/%{name}
-%{_localstatedir}/lib/%{name}
+%{_unitdir}/monitorix.service
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/monitorix.conf
+%config(noreplace) %{_sysconfdir}/logrotate.d/monitorix
+%config(noreplace) %{_sysconfdir}/monitorix.conf
+%{_bindir}/monitorix
+%{_datadir}/monitorix/logo_top.png
+%{_datadir}/monitorix/logo_bot.png
+%{_datadir}/monitorix/monitorixico.png
+%{_datadir}/monitorix/cgi-bin/monitorix.cgi
+%attr(777,apache,apache) %{_datadir}/monitorix/imgs
+%attr(755,root,root) %{_localstatedir}/lib/monitorix/usage
+%config(noreplace) %{_localstatedir}/lib/monitorix/reports/*.html
+%{_localstatedir}/lib/monitorix/reports/send_reports
+%doc %{_mandir}/man5/monitorix.conf.5.xz
+%doc %{_mandir}/man8/monitorix.8.xz
+%doc Changes COPYING README README.nginx README.FreeBSD README.OpenBSD docs/monitorix-alert.sh
