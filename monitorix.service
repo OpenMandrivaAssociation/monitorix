@@ -1,0 +1,14 @@
+[Unit]
+Description=Monitorix monitoring daemon
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/run/moitorix.pid
+EnvironmentFile=-/etc/monitorix.conf
+ExecStart=/usr/bin/monitorix -c $OPTIONS --pid-file /run/monitorix.pid
+ExecReload=/usr/bin/kill -HUP $MAINPID
+TimeoutSec=180
+
+[Install]
+WantedBy=multi-user.target
