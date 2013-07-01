@@ -1,4 +1,4 @@
-Summary: Monitorix is a system monitoring tool
+Summary: System monitoring tool
 Name: monitorix
 Version: 2.5.2
 Release: 1
