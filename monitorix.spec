@@ -1,7 +1,7 @@
 Summary: System monitoring tool
 Name: monitorix
 Version: 2.5.2
-Release: 1
+Release: 2
 License: GPLv2
 Group: Monitoring
 URL: http://www.monitorix.org
