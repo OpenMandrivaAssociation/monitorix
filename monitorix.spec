@@ -1,23 +1,21 @@
-Summary: System monitoring tool
-Name: monitorix
-Version: 2.5.2
-Release: 2
-License: GPLv2
-Group: Monitoring
-URL: http://www.monitorix.org
-Source0: http://www.monitorix.org/%{name}-%{version}.tar.gz
-Source1: monitorix.service
-BuildArch: noarch
+Summary:	System monitoring tool
+Name:		monitorix
+Version:	2.5.2
+Release:	2
+License:	GPLv2
+Group:		Monitoring
+Url:		http://www.monitorix.org
+Source0:	http://www.monitorix.org/%{name}-%{version}.tar.gz
+Source1:	monitorix.service
+BuildArch:	noarch
 
-Requires: rrdtool
-Requires: perl
-Requires: perl-libwww-perl
-Requires: perl-MailTools
-Requires: perl-MIME-Lite
-Requires: perl-DBI
-
-Requires(pre): rpm-helper
-Requires(preun): rpm-helper
+Requires:	perl
+Requires:	perl-libwww-perl
+Requires:	perl-MailTools
+Requires:	perl-MIME-Lite
+Requires:	perl-DBI
+Requires:	rrdtool
+Requires(pre,preun):	rpm-helper
 
 %description
 Monitorix is a free, open source, lightweight system monitoring tool designed
@@ -31,8 +29,6 @@ simplicity and small size may also be used on embedded devices as well.
 %build
 
 %install
-#mkdir -p %{buildroot}%{_initrddir}
-#install -m 0755 docs/monitorix.init %{buildroot}%{_initrddir}/monitorix
 mkdir -p %{buildroot}%{_unitdir}
 install -m 0755 %{SOURCE1} %{buildroot}%{_unitdir}/
 mkdir -p %{buildroot}%{_sysconfdir}/httpd/conf.d
@@ -67,6 +63,7 @@ install -m 0644 man/man8/monitorix.8 %{buildroot}%{_mandir}/man8
 %_preun_service %{name}
 
 %files
+%doc Changes COPYING README README.nginx README.FreeBSD README.OpenBSD docs/monitorix-alert.sh
 %{_unitdir}/monitorix.service
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/monitorix.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/monitorix
@@ -82,4 +79,4 @@ install -m 0644 man/man8/monitorix.8 %{buildroot}%{_mandir}/man8
 %{_localstatedir}/lib/monitorix/reports/send_reports
 %doc %{_mandir}/man5/monitorix.conf.5.xz
 %doc %{_mandir}/man8/monitorix.8.xz
-%doc Changes COPYING README README.nginx README.FreeBSD README.OpenBSD docs/monitorix-alert.sh
+
