@@ -1,2 +1,4 @@
+removed_sources:
+  monitorix-2.5.2.tar.gz: 1ab329cf3d4225a393c744534c2fd7d3f53b797b
 sources:
-  "monitorix-2.5.2.tar.gz": 1ab329cf3d4225a393c744534c2fd7d3f53b797b
+  monitorix-3.5.0.tar.gz: a0173887b73b6382f275c840b4d26fe9c42d46a0
