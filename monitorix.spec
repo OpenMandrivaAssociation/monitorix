@@ -1,6 +1,6 @@
 Name:              monitorix
 Version:           3.5.0
-Release:           2
+Release:           3
 Summary:           A free, open source, lightweight system monitoring tool
 License:           GPLv2+
 Group:             Monitoring
