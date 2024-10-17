@@ -4,7 +4,7 @@ Release:	1
 Summary:           A free, open source, lightweight system monitoring tool
 License:           GPLv2+
 Group:             Monitoring
-URL:               http://www.monitorix.org
+URL:               https://www.monitorix.org
 Source0:           http://www.monitorix.org/%{name}-%{version}.tar.gz
 BuildArch:         noarch
 BuildRequires:     perl
